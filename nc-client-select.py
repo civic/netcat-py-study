@@ -23,6 +23,8 @@ def main():
         while not finished.is_set():
             try:
                 events = sel.select()
+                if finished.is_set():
+                    break
                 for key, mask in events:
                     callback = key.data
                     callback(sock, finished)
@@ -39,8 +41,11 @@ def stdin_read(sock, finished):
 
 def sock_read(sock, finished):
     from_server = sock.recv(1024)
-    sys.stdout.buffer.write(from_server)
-    sys.stdout.flush()
+    if from_server:
+        sys.stdout.buffer.write(from_server)
+        sys.stdout.flush()
+    else:
+        finished.set()
 
 
 def parse_args():
